@@ -1,6 +1,6 @@
 [project]
 name = "yandex-music-mcp"
-version = "0.1.0"
+version = "0.2.0"
 description = "Unofficial Yandex Music MCP server: search, likes, history, My Wave, playlists for Claude and other MCP clients"
 readme = "README.md"
 license = "MIT"
@@ -9,14 +9,24 @@ requires-python = ">=3.10"
 authors = [{ name = "Kenzolika" }]
 dependencies = [
     "mcp>=1.10,<2",
-    "yandex-music>=3.0",
+    "yandex-music>=3.0,<4",
 ]
 keywords = ["mcp", "yandex-music", "claude", "model-context-protocol", "playlists"]
 classifiers = [
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Operating System :: OS Independent",
     "Topic :: Multimedia :: Sound/Audio",
 ]
+
+[project.urls]
+Homepage = "https://github.com/kenzolika/yandex-music-mcp"
+Repository = "https://github.com/kenzolika/yandex-music-mcp"
+Issues = "https://github.com/kenzolika/yandex-music-mcp/issues"
+Changelog = "https://github.com/kenzolika/yandex-music-mcp/releases"
 
 [project.scripts]
 yandex-music-mcp = "yandex_music_mcp.server:main"

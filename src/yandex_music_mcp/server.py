@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 import sys
 from pathlib import Path
 from typing import Any, Literal
@@ -333,6 +334,46 @@ def get_album_tracks(album_id: int) -> dict[str, Any]:
     return {"album": fmt_album(a), "tracks": tracks}
 
 
+_PL_USER = re.compile(r"/users/([^/?#]+)/playlists/(\d+)")
+_PL_UUID = re.compile(r"/playlists?/((?:lk\.)?[0-9a-fA-F-]{8,}|lk\.[^/?#]+)")
+_ALBUM = re.compile(r"/album/(\d+)")
+
+
+@mcp.tool(annotations=READ)
+@guard
+def get_playlist_by_url(url: str, limit: int = 300) -> dict[str, Any]:
+    """Треки по ссылке на Яндекс Музыку — в том числе чужого публичного плейлиста.
+    Понимает ссылки вида music.yandex.ru/users/<логин>/playlists/<номер>,
+    music.yandex.ru/playlists/<uuid> (новый формат, в т.ч. lk.…) и ссылки на альбом /album/<id>.
+    Подходит любой домен Яндекс Музыки (.ru, .com, .by, .kz и т.д.)."""
+    url = url.strip()
+    m = _PL_USER.search(url)
+    if m:
+        owner, kind = m.group(1), int(m.group(2))
+        p = client().users_playlists(kind, owner)
+    else:
+        m = _PL_UUID.search(url)
+        if m:
+            p = client().playlist(m.group(1))
+        else:
+            m = _ALBUM.search(url)
+            if m:
+                return get_album_tracks(int(m.group(1)))
+            raise ValueError(
+                "Не узнала ссылку. Нужна ссылка на плейлист или альбом Яндекс Музыки, "
+                "например music.yandex.ru/users/<логин>/playlists/1005 или music.yandex.ru/playlists/<uuid>."
+            )
+    if p is None:
+        raise ValueError("Плейлист не найден или он приватный.")
+    shorts = (p.tracks or [])[:limit]
+    if not shorts and p.track_count:
+        try:
+            shorts = (p.fetch_tracks() or [])[:limit]
+        except Exception:
+            pass
+    return {"playlist": fmt_playlist(p), "tracks": _shorts_to_tracks(shorts)}
+
+
 @mcp.tool(annotations=READ)
 @guard
 def get_artist_tracks(artist_id: int, limit: int = 20) -> dict[str, Any]:
@@ -479,6 +520,22 @@ def remove_tracks_from_playlist(kind: int, track_ids: list[str]) -> dict[str, An
         p = client().users_playlists_delete_track(kind, i, i + 1, revision=revision)
         revision = p.revision
     return {"removed": len(idx), "playlist": fmt_playlist(p)}
+
+
+@mcp.tool(annotations=DELETE)
+@guard
+def delete_playlist(kind: int, confirm_title: str) -> dict[str, Any]:
+    """НЕОБРАТИМО удаляет мой плейлист целиком. Перед вызовом обязательно спроси пользователя.
+    confirm_title — точное название удаляемого плейлиста (защита от удаления не того плейлиста)."""
+    p = client().users_playlists(kind)
+    if p is None:
+        raise ValueError(f"Плейлист {kind} не найден")
+    if (p.title or "").strip() != confirm_title.strip():
+        raise ValueError(
+            f"Название не совпало: у плейлиста {kind} название «{p.title}», а передано «{confirm_title}». Ничего не удалено."
+        )
+    ok = client().users_playlists_delete(kind)
+    return {"deleted": bool(ok), "kind": kind, "title": p.title}
 
 
 @mcp.tool(annotations=WRITE)

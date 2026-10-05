@@ -39,21 +39,32 @@
 
 ## Быстрая установка
 
-Нужен только [uv](https://docs.astral.sh/uv/) (как его поставить — в шаге 1 ниже).
+**1. Установите [uv](https://docs.astral.sh/uv/)** — он скачает и запустит коннектор:
 
-**1. Войдите в Яндекс (один раз):**
+- Windows (PowerShell):
+  ```powershell
+  powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+  ```
+- macOS / Linux:
+  ```bash
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  ```
+
+Закройте терминал, откройте заново и проверьте: `uv --version`.
+
+**2. Войдите в Яндекс (один раз):**
 
 ```bash
 uvx --from yandex-music-mcp yandex-music-mcp-auth
 ```
 
-**2. Подключите к клиенту:**
+**3. Подключите к клиенту:**
 
 - **Claude Code** — одна команда:
   ```bash
   claude mcp add yandex-music -- uvx yandex-music-mcp
   ```
-- **Claude Desktop** — добавьте в `claude_desktop_config.json` (как открыть файл — в шаге 5а ниже):
+- **Claude Desktop** — откройте **Settings → Developer → Edit Config** и добавьте в файл `claude_desktop_config.json`:
   ```json
   {
     "mcpServers": {
@@ -65,7 +76,7 @@ uvx --from yandex-music-mcp yandex-music-mcp-auth
   }
   ```
 
-Если что-то не получилось, ниже пошаговая установка из исходников с подробностями.
+Если что-то не получилось, ниже — пошаговая установка из исходников с подробностями.
 
 ---
 
@@ -196,12 +207,11 @@ The server does not control playback: listen in the Yandex Music app as usual; n
 
 ### Quick install
 
-You only need [uv](https://docs.astral.sh/uv/).
-
-1. Sign in to Yandex (once): `uvx --from yandex-music-mcp yandex-music-mcp-auth`
-2. Connect a client:
+1. Install [uv](https://docs.astral.sh/uv/). Windows (PowerShell): `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`; macOS/Linux: `curl -LsSf https://astral.sh/uv/install.sh | sh`. Reopen the terminal and check `uv --version`.
+2. Sign in to Yandex (once): `uvx --from yandex-music-mcp yandex-music-mcp-auth`
+3. Connect a client:
    - **Claude Code:** `claude mcp add yandex-music -- uvx yandex-music-mcp`
-   - **Claude Desktop:** add to `claude_desktop_config.json`:
+   - **Claude Desktop:** open **Settings → Developer → Edit Config** and add to `claude_desktop_config.json`:
      ```json
      {
        "mcpServers": {

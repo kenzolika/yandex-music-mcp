@@ -1,0 +1,43 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.kenzolika/yandex-music-mcp",
+  "title": "Yandex Music (unofficial)",
+  "description": "Unofficial Yandex Music server: search, likes, history, My Wave, playlists. Token stays local.",
+  "version": "0.2.0",
+  "websiteUrl": "https://github.com/kenzolika/yandex-music-mcp",
+  "repository": {
+    "url": "https://github.com/kenzolika/yandex-music-mcp",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "yandex-music-mcp",
+      "version": "0.2.0",
+      "runtimeHint": "uvx",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "YANDEX_MUSIC_TOKEN",
+          "description": "Yandex Music OAuth token. Optional: by default it is read from ~/.yandex-music-mcp/token created by yandex-music-mcp-auth.",
+          "isRequired": false,
+          "isSecret": true
+        },
+        {
+          "name": "YANDEX_MUSIC_TOKEN_FILE",
+          "description": "Path to a file with the token, if it is not in the default location.",
+          "isRequired": false,
+          "format": "filepath"
+        },
+        {
+          "name": "YANDEX_MUSIC_EXPORT_DIR",
+          "description": "Folder for .txt/.csv exports. Default: Documents/Yandex Music exports.",
+          "isRequired": false,
+          "format": "filepath"
+        }
+      ]
+    }
+  ]
+}

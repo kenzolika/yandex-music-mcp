@@ -3,7 +3,7 @@
   "name": "io.github.kenzolika/yandex-music-mcp",
   "title": "Yandex Music (unofficial)",
   "description": "Unofficial Yandex Music server: search, likes, history, My Wave, playlists. Token stays local.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "websiteUrl": "https://github.com/kenzolika/yandex-music-mcp",
   "repository": {
     "url": "https://github.com/kenzolika/yandex-music-mcp",
@@ -13,7 +13,7 @@
     {
       "registryType": "pypi",
       "identifier": "yandex-music-mcp",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "runtimeHint": "uvx",
       "transport": {
         "type": "stdio"

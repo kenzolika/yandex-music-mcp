@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.1 — 2026-10-05
 
 ### Новое · Added
 - `get_liked_tracks` отдаёт `liked_at` — дату и время лайка; в CSV-выгрузке лайков `export_tracks_to_file` появилась колонка «Дата лайка».

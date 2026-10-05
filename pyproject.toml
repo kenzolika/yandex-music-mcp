@@ -1,6 +1,6 @@
 [project]
 name = "yandex-music-mcp"
-version = "0.2.0"
+version = "0.2.1"
 description = "Unofficial Yandex Music MCP server: search, likes, history, My Wave, playlists for Claude and other MCP clients"
 readme = "README.md"
 license = "MIT"

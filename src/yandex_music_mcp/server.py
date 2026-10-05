@@ -182,6 +182,15 @@ def _shorts_to_tracks(shorts: list[Any]) -> list[dict[str, Any]]:
     return out
 
 
+def _with_liked_at(shorts: list[Any]) -> list[dict[str, Any]]:
+    """TrackShort из лайков → полные треки + liked_at (когда поставлен лайк, ISO-время)."""
+    when = {str(s.track_id).split(":")[0]: getattr(s, "timestamp", None) for s in shorts}
+    out = _fetch_tracks([s.track_id for s in shorts])
+    for t in out:
+        t["liked_at"] = when.get(str(t["id"]).split(":")[0])
+    return out
+
+
 def _split_id(track_id: str) -> tuple[str, str | None]:
     tid, _, aid = str(track_id).partition(":")
     return tid, aid or None
@@ -269,14 +278,14 @@ def search(
 @mcp.tool(annotations=READ)
 @guard
 def get_liked_tracks(limit: int = 50, offset: int = 0) -> dict[str, Any]:
-    """Треки из «Мне нравится», от последних лайков к старым. Для анализа вкуса бери limit побольше (до 500)."""
+    """Треки из «Мне нравится», от последних лайков к старым, с датой лайка (liked_at). Для анализа вкуса бери limit побольше (до 500)."""
     likes = client().users_likes_tracks()
     shorts = likes.tracks if likes else []
     page = shorts[offset : offset + limit]
     return {
         "total_liked": len(shorts),
         "offset": offset,
-        "tracks": _fetch_tracks([s.track_id for s in page]),
+        "tracks": _with_liked_at(page),
     }
 
 
@@ -447,11 +456,11 @@ def export_tracks_to_file(
     file_name: str | None = None,
 ) -> dict[str, Any]:
     """Выгружает ВСЕ треки (лайки или плейлист) в текстовые файлы на компьютер, не загружая их в чат:
-    .txt («Исполнитель — Название», по строке) и .csv (с альбомом, годом, жанром, id).
+    .txt («Исполнитель — Название», по строке) и .csv (с альбомом, годом, жанром, id; для лайков — дата лайка).
     Файлы кладутся в «Документы/Yandex Music exports» (или в YANDEX_MUSIC_EXPORT_DIR). Для source="playlist" нужен kind."""
     if source == "likes":
         likes = client().users_likes_tracks()
-        tracks = _fetch_tracks([s.track_id for s in (likes.tracks if likes else [])])
+        tracks = _with_liked_at(likes.tracks if likes else [])
         default = "Мне нравится"
     else:
         if kind is None:
@@ -475,10 +484,11 @@ def export_tracks_to_file(
             f.write(f"{', '.join(t['artists'])} — {t['title']}\n")
     with csv_path.open("w", encoding="utf-8-sig", newline="") as f:
         w = csv.writer(f, delimiter=";")
-        w.writerow(["№", "Исполнитель", "Название", "Альбом", "Год", "Жанр", "Длительность", "Доступен", "ID"])
+        w.writerow(["№", "Исполнитель", "Название", "Альбом", "Год", "Жанр", "Длительность", "Доступен", "ID", "Дата лайка"])
         for i, t in enumerate(tracks, 1):
             w.writerow([i, ", ".join(t["artists"]), t["title"], t["album"], t["year"], t["genre"],
-                        t["duration"], "да" if t["available"] else "нет", t["id"]])
+                        t["duration"], "да" if t["available"] else "нет", t["id"],
+                        (t.get("liked_at") or "")[:10]])
     return {"count": len(tracks), "txt": str(txt), "csv": str(csv_path)}
 
 

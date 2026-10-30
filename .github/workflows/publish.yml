@@ -1,0 +1,70 @@
+# Trusted Publishing to PyPI on tags v*.
+# Before the first release, add a PyPI trusted publisher for this repo:
+#   owner: kenzolika
+#   repository: yandex-music-mcp
+#   workflow: publish.yml
+#   environment: pypi
+# and create a GitHub Actions environment named "pypi".
+name: Publish to PyPI
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Tag matches package version
+        run: |
+          python - <<'PY'
+          import os
+          import tomllib
+          from pathlib import Path
+
+          tag = os.environ["GITHUB_REF_NAME"]
+          version = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))["project"]["version"]
+          expected = f"v{version}"
+          if tag != expected:
+              raise SystemExit(f"tag {tag} does not match pyproject version {version} (expected {expected})")
+          PY
+
+      - name: Install, lint, and test
+        run: |
+          python -m pip install -e ".[dev]" build
+          ruff check src tests
+          pytest
+
+      - name: Build distributions
+        run: python -m build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist

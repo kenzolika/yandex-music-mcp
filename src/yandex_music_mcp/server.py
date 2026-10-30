@@ -24,7 +24,6 @@ from yandex_music.exceptions import UnauthorizedError, YandexMusicError
 
 # stdout занят протоколом MCP — все логи только в stderr
 logging.basicConfig(stream=sys.stderr, level=logging.WARNING)
-log = logging.getLogger("yandex-music-mcp")
 
 
 mcp = FastMCP("yandex-music")

@@ -33,6 +33,7 @@ Changelog = "https://github.com/kenzolika/yandex-music-mcp/releases"
 dev = [
     "pytest>=8.3",
     "ruff>=0.8",
+    "tomli>=2.0; python_version < '3.11'",
 ]
 
 [project.scripts]

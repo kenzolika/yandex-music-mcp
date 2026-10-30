@@ -1,6 +1,5 @@
 """Import and metadata checks. These do not call the Yandex Music API."""
 
-import tomllib
 from importlib.metadata import version
 from pathlib import Path
 
@@ -34,8 +33,16 @@ def test_server_app_name():
     assert mcp.name == "yandex-music"
 
 
+def _load_toml(path: Path) -> dict:
+    try:
+        import tomllib
+    except ModuleNotFoundError:  # Python 3.10
+        import tomli as tomllib
+    return tomllib.loads(path.read_text(encoding="utf-8"))
+
+
 def test_project_metadata_has_no_label_prefixes():
-    project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]
+    project = _load_toml(ROOT / "pyproject.toml")["project"]
     description = project["description"]
     assert description
     assert not description.lower().startswith("description:")
